@@ -23,7 +23,7 @@
 #include <dlfcn.h>
 
 #include <EGL/egl.h>
-#ifdef USE_MHEAP_SCREENSHOT
+#if defined (USE_MHEAP_SCREENSHOT) || defined (STE_HARDWARE)
 #include <GLES/gl.h>
 #endif
 
@@ -3149,6 +3149,9 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
     uint32_t code;
     Parcel const* data;
     Parcel* reply;
+#ifdef STE_HARDWARE
+    Mutex mLock;
+#endif
 
     enum {
         MSG_API_CALL,
@@ -3161,6 +3164,9 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
      */
     virtual status_t transact(uint32_t code,
             const Parcel& data, Parcel* reply, uint32_t flags) {
+#ifdef STE_HARDWARE
+        mLock.lock();
+#endif
         this->code = code;
         this->data = &data;
         this->reply = reply;
@@ -3173,6 +3179,9 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
             looper->sendMessage(this, Message(MSG_API_CALL));
             barrier.wait();
         }
+#ifdef STE_HARDWARE
+        mLock.unlock();
+#endif
         return NO_ERROR;
     }
 
@@ -3654,7 +3663,7 @@ SurfaceFlinger::DisplayDeviceState::DisplayDeviceState(DisplayDevice::DisplayTyp
 
 }; // namespace android
 
-
+#ifndef STE_HARDWARE
 #ifndef USE_MHEAP_SCREENSHOT
 #if defined(__gl_h_)
 #error "don't include gl/gl.h in this file"
@@ -3662,5 +3671,6 @@ SurfaceFlinger::DisplayDeviceState::DisplayDeviceState(DisplayDevice::DisplayTyp
 
 #if defined(__gl2_h_)
 #error "don't include gl2/gl2.h in this file"
+#endif
 #endif
 #endif
