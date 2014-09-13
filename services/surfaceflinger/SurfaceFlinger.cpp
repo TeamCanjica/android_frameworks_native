@@ -23,7 +23,7 @@
 #include <dlfcn.h>
 
 #include <EGL/egl.h>
-#if defined (USE_MHEAP_SCREENSHOT) || defined (STE_HARDWARE)
+#ifdef USE_MHEAP_SCREENSHOT
 #include <GLES/gl.h>
 #endif
 
@@ -3663,7 +3663,6 @@ SurfaceFlinger::DisplayDeviceState::DisplayDeviceState(DisplayDevice::DisplayTyp
 
 }; // namespace android
 
-#ifndef STE_HARDWARE
 #ifndef USE_MHEAP_SCREENSHOT
 #if defined(__gl_h_)
 #error "don't include gl/gl.h in this file"
@@ -3671,6 +3670,5 @@ SurfaceFlinger::DisplayDeviceState::DisplayDeviceState(DisplayDevice::DisplayTyp
 
 #if defined(__gl2_h_)
 #error "don't include gl2/gl2.h in this file"
-#endif
 #endif
 #endif
